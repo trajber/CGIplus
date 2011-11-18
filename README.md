@@ -13,7 +13,7 @@ you will find:
 Prerequisits
 ------------
 
-  * g++ 4.6 - <http://gcc.gnu.org/>
+  * g++ - <http://gcc.gnu.org/>
   * python 2.7 - <http://www.python.org/>
   * scons 2.0 - <http://www.scons.org/>
   * libboost-system-dev 1.4 - <http://www.boost.org>

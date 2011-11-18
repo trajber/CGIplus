@@ -20,6 +20,8 @@
 #ifndef __CGIPLUS_CGIPLUS_H__
 #define __CGIPLUS_CGIPLUS_H__
 
+#include <boost/foreach.hpp>
+
 /*! \mainpage CGIplus
  *
  * To avoid duplicated documentation you can check \b README.md file
@@ -29,5 +31,7 @@
 
 #define CGIPLUS_NS_BEGIN namespace cgiplus {
 #define CGIPLUS_NS_END };
+
+#define foreach         BOOST_FOREACH
 
 #endif // __CGIPLUS_CGIPLUS_H__

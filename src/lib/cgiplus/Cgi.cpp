@@ -26,6 +26,9 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
+
+#include <boost/typeof/std/string.hpp>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -42,7 +45,7 @@ Cgi::Cgi() :
 
 string Cgi::operator[](const string &key)
 {
-	auto input = _inputs.find(key);
+	BOOST_AUTO(input, _inputs.find(key));
 	if (input != _inputs.end()) {
 		return input->second;
 	}
@@ -52,7 +55,7 @@ string Cgi::operator[](const string &key)
 
 string Cgi::operator()(const string &key)
 {
-	auto cookie = _cookies.find(key);
+	BOOST_AUTO(cookie, _cookies.find(key));
 	if (cookie != _cookies.end()) {
 		return cookie->second;
 	}
@@ -171,7 +174,7 @@ void Cgi::readCookies()
 	std::vector<string> keysValues;
 	boost::split(keysValues, cookies, boost::is_any_of("; "));
 
-	for (string &keyValue: keysValues) {
+	foreach (string &keyValue, keysValues) {
 		std::vector<string> keyValueSplitted;
 		boost::split(keyValueSplitted, keyValue, boost::is_any_of("="));
 		if (keyValueSplitted.size() == 2) {
@@ -197,7 +200,7 @@ void Cgi::parse(string inputs)
 	std::vector<string> keysValues;
 	boost::split(keysValues, inputs, boost::is_any_of("&"));
 
-	for (auto keyValue: keysValues) {
+	foreach (string keyValue, keysValues) {
 		std::vector<string> keyValueSplitted;
 		boost::split(keyValueSplitted, keyValue, boost::is_any_of("="));
 		if (keyValueSplitted.size() == 2) {

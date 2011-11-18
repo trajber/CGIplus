@@ -21,8 +21,12 @@
 #include <fstream>
 #include <sstream>
 
+#include <utility>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
+
+#include <boost/typeof/std/string.hpp>
 
 #include <cgiplus/Builder.hpp>
 #include <cgiplus/Cookie.hpp>
@@ -62,7 +66,7 @@ string& Builder::operator[](const string &key)
 
 Cookie& Builder::operator()(const string &key)
 {
-	auto cookieIt = _cookies.find(key);
+	BOOST_AUTO(cookieIt, _cookies.find(key));
 	if (cookieIt != _cookies.end()) {
 		return cookieIt->second;
 	}
@@ -77,12 +81,14 @@ Cookie& Builder::operator()(const string &key)
 string Builder::build() const
 {
 	string header = Format::toString(_format);
-	for (auto cookie: _cookies) {
+	std::pair<string, Cookie> cookie;
+	foreach (cookie, _cookies) {
 		header += cookie.second.build();
 	}
 
 	string content = _form;
-	for (auto field: _fields) {
+	std::pair<string, string> field;
+	foreach (field, _fields) {
 		string key  = _tags.first + field.first + _tags.second;
 		boost::replace_all(content, key, field.second);
 	}
