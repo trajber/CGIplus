@@ -24,6 +24,7 @@
 #include <string>
 
 #include "Cgiplus.hpp"
+#include "UploadedFile.hpp"
 
 using std::string;
 
@@ -122,6 +123,7 @@ private:
 	void readRemoteAddress();
 
 	void parse(string inputs);
+	UploadedFile parseMultipart(string &inputs, string &boundary);
 
 	void decode(string &inputs);
 	void decodeSpecialSymbols(string &inputs);

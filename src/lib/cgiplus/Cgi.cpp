@@ -21,18 +21,22 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <boost/assign/std/vector.hpp>
 #include <boost/typeof/std/string.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
 #include <cgiplus/Cgi.hpp>
+
+using namespace boost::assign; // bring 'operator+=()' into scope
 
 CGIPLUS_NS_BEGIN
 
@@ -135,11 +139,6 @@ void Cgi::readPostInputs()
 	}
 
 	string type = typePtr;
-	if (type != "application/x-www-form-urlencoded") {
-		// http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4
-		// TODO: Upload file -> multipart/form-data
-		return;
-	}
 
 	int size = 0;
 	try {
@@ -159,7 +158,30 @@ void Cgi::readPostInputs()
 	}
 
 	string inputs = inputsPtr;
-	parse(inputs);
+
+	if (type == "application/x-www-form-urlencoded") {
+		parse(inputs);
+	}
+
+	if (type.find("multipart/form-data") != string::npos) {
+		std::vector<string> splittedData;
+		boost::split(splittedData, type, boost::is_any_of(";"));
+
+		if (splittedData.size() != 2) {
+			// TODO: malformed multipart data
+		}
+
+		string boundaryText = splittedData[1];
+
+		boost::split(splittedData, boundaryText, boost::is_any_of("="));
+		if (splittedData.size() != 2) {
+			// TODO: malformed multipart data
+		}
+
+		string boundary = splittedData[1];
+
+		UploadedFile uploadedFile = parseMultipart(inputs, boundary);
+	}
 }
 
 void Cgi::readCookies()
@@ -207,6 +229,37 @@ void Cgi::parse(string inputs)
 			_inputs[keyValueSplitted[0]] = keyValueSplitted[1];
 		}
 	}
+}
+
+UploadedFile Cgi::parseMultipart(string &inputs, string &boundary)
+{
+	UploadedFile uploadedFile;
+	size_t pos = 0;
+	size_t first_occurrence, second_occurrence = 0;
+
+	while (1) {
+		first_occurrence = inputs.find(boundary, pos);
+		if (first_occurrence == string::npos) {
+			break;
+		}
+
+		pos += first_occurrence + boundary.size();
+		second_occurrence = inputs.find(boundary, pos);
+		if (second_occurrence == string::npos) {
+			break;
+		}
+
+		string partial_data;
+		partial_data = inputs.substr(first_occurrence + boundary.size(),
+		                             second_occurrence -
+		                             (first_occurrence + boundary.size()));
+
+		uploadedFile.setMultipart(partial_data);
+
+		pos += second_occurrence + boundary.size();
+	}
+
+	return uploadedFile;
 }
 
 void Cgi::decode(string &inputs)
